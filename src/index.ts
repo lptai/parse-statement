@@ -1,8 +1,7 @@
 import { writeToFile } from './fileServices';
 import { parsePDF } from './parse-pdf';
 
-const filePath =
-  '/Users/taile/Downloads/thong_tin_ung_ho_qua_tsk_vcb_0011001932418_tu_01_09_den10_09_2024.pdf';
+const filePath = './data/statement.pdf';
 
 // Define the structure of a transaction
 interface Transaction {
