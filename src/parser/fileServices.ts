@@ -20,7 +20,7 @@ export const writeToJsonFile = (data: any[], name: string) => {
   fs.writeFileSync(`${basePath}/${name}.json`, jsonContent);
 };
 
-export const writeToCsvFile = (data: any[], header: any[], name: string) => {
+export const writeToCsvFile = (data: any[], header: any[], name: string, separator = '|') => {
   let content = data.reduce(
     (acc, item) =>
       acc +
@@ -28,9 +28,9 @@ export const writeToCsvFile = (data: any[], header: any[], name: string) => {
         .map((key) => {
           return item[key];
         })
-        .join(',') +
+        .join(separator) +
       '\n',
-    header.join(','),
+    header.join(separator) + '\n',
   );
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath, { recursive: true });
