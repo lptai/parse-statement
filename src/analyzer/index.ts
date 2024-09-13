@@ -1,10 +1,10 @@
 const formattedNumber = (number) =>
-  String(number).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  String(number).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 const formatTransaction = (t) =>
-  `Ngày: ${t.date} - Số tiền (VND): ${formattedNumber(
+  `${t.date},${formattedNumber(
     t.amountUnit,
-  )} - Mã tham chiếu: ${t.reference} - Lời nhắn: ${t.description}`;
+  )},${t.reference},${t.description}`;
 
 console.log(formattedNumber); // Output: 135,055,960,736
 

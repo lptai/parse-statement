@@ -1,20 +1,28 @@
 import { analyze } from '../analyzer';
-import { writeToFile } from './fileServices';
+import { writeToJsonFile, writeToCsvFile } from './fileServices';
 import { parsePDF } from './parse-pdf';
 
-const filePath = './thong_tin_ung_ho_qua_tsk_vcb_0011001932418_tu_01_09_den10_09_2024.pdf';
+const filePath =
+  './data/thong_tin_ung_ho_qua_tsk_vcb_0011001932418_tu_01_09_den10_09_2024.pdf';
 
 // Define the structure of a transaction
 interface Transaction {
   date: string;
-  amount: number;
+  amount: string;
+  amountUnit: string;
+  reference: string;
   description: string;
 }
 
 // Usage example
 parsePDF(filePath)
   .then((transactions) => {
-    writeToFile(transactions, 'transactions');
+    writeToJsonFile(transactions, 'transactions');
+    writeToCsvFile(
+      transactions,
+      ['date', 'amount', 'reference', 'description', 'amountUnit'],
+      'transactions',
+    );
     console.log(`transactions have been written to file`);
     console.log(`Analyze transactions:`, analyze(transactions));
   })

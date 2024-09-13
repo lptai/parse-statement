@@ -11,13 +11,32 @@ export const getWriteStream = (name: string) => {
   return fs.createWriteStream(`${basePath}/${name}.json`, { flags: 'a' });
 };
 
-export const writeToFile = (data: any[], name: string) => {
+export const writeToJsonFile = (data: any[], name: string) => {
   const jsonContent = JSON.stringify(data);
   if (!fs.existsSync(basePath)) {
     fs.mkdirSync(basePath, { recursive: true });
   }
 
   fs.writeFileSync(`${basePath}/${name}.json`, jsonContent);
+};
+
+export const writeToCsvFile = (data: any[], header: any[], name: string) => {
+  let content = data.reduce(
+    (acc, item) =>
+      acc +
+      header
+        .map((key) => {
+          return item[key];
+        })
+        .join(',') +
+      '\n',
+    header.join(','),
+  );
+  if (!fs.existsSync(basePath)) {
+    fs.mkdirSync(basePath, { recursive: true });
+  }
+
+  fs.writeFileSync(`${basePath}/${name}.csv`, content);
 };
 
 export const readFromFile = async (fileName: string): Promise<string> => {
