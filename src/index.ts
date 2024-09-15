@@ -1,37 +1,71 @@
-import { PdfExtractor } from '../lib/PdfExtractor';
-import { writeToCsvFile } from './fileServices';
-import { argibank, bidv, Issuer, vcb, vietin } from './issuer/issuser';
+import { Issuer } from './interface';
+import { parsePDF } from './parser/parser';
+import { PdfExtractor } from './parser/PdfExtractor';
+import { VcbExtractor } from './parser/vcb/VcbExtractor';
 
-// Function to read and parse PDF
-export async function parsePDF(issuer: Issuer) {
-  for (let index = 0; index < issuer.filePaths.length; index++) {
-    const filePath = issuer.filePaths[index];
-    try {
-      const result = await issuer.getParser().load(`./data_pdf/${filePath}`);
+const vcbFilePaths = [
+  'thong_tin_ung_ho_qua_tsk_vcb_0011001932418_tu_01_09_den10_09_2024.pdf',
+];
 
-      // normalize the extracted data
-      const normalizedRows = result.pageTables.flatMap((pageTable) =>
-        pageTable.rows
-          .map((row) =>
-            row.filter(Boolean).map((cell) => cell.replaceAll('\n', ' ')),
-          )
-          .filter((row) => row.length > 0),
-      );
+const bidvFilePaths = [
+  'Thong tin so tien ung ho qua so tai khoan BIDV 1261122666 tu ngay 01.09 den 12.09.2024.pdf',
+];
+const vietinFilePaths = [
+  'Thong tin so tien ung ho qua so tai khoan VietinBank CT1111 - 111602391111 tu ngay 10 den 12.9.2024.pdf',
+];
+const argibankFilePaths = [
+  'SoPhuUBMTTQHN-1500201113838 tu 01.09-12.09.2024.pdf',
+  'mttq_agribank_caobang.pdf',
+];
 
-      const transactions = normalizedRows.filter(issuer.isValidRecord);
+const isValidArgibank = (row: string[]) =>
+  row.every((cell) => !cell.includes('SỔ PHỤ') && !cell.includes('Ngày  Date'));
 
-      console.log(
-        `Extracted ${transactions.length} transactions from ${result.pageTables.length} pages from ${filePath}`,
-      );
+const findHeaderRow = (rows: string[][], str: string) =>
+  rows.find((row) => row.some((cell) => cell.includes(str)));
 
-      const fileName = filePath.replace('.pdf', '.csv');
-      writeToCsvFile(transactions, issuer.headers(normalizedRows), fileName);
-    } catch (error) {
-      console.error('Error reading or parsing the PDF file:', error);
-    }
-  }
-}
+const argibank: Issuer = {
+  filePaths: argibankFilePaths,
+  isValidRecord: isValidArgibank,
+  headers: (rows) => findHeaderRow(rows, 'Ngày  Date'),
+  getParser: () => new PdfExtractor(),
+};
+
+const bidv: Issuer = {
+  filePaths: bidvFilePaths,
+  isValidRecord: (row) =>
+    row.every(
+      (cell) =>
+        !cell.includes(
+          '351 Chứng từ này được in/chuyển đổi trực tiếp từ hệ thống In sao kê tài khoản',
+        ) && !cell.includes('Ngày giao dịch'),
+    ),
+  headers: (rows) => findHeaderRow(rows, 'Ngày giao dịch'),
+  getParser: () => new PdfExtractor(),
+};
+
+const vietin: Issuer = {
+  filePaths: vietinFilePaths,
+  isValidRecord: (row) =>
+    row.every(
+      (cell) =>
+        !cell.includes('STT |Ngày GD |Mô tả giao dịch |Số tiền|Tên đối ứng') &&
+        !cell.includes(
+          'No |Date Time |Transaction Comment |(Có) Credit|Offset Name',
+        ),
+    ),
+  headers: (rows) => findHeaderRow(rows, 'Ngày GD'),
+  getParser: () => new PdfExtractor(),
+};
+
+const vcb: Issuer = {
+  filePaths: vcbFilePaths,
+  isValidRecord: () => true,
+  headers: () => ['date', 'amount', 'reference', 'description'],
+  getParser: () => new VcbExtractor(),
+};
 
 void (async () => {
-  await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
+  // await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
+  await Promise.all([vcb].map(parsePDF));
 })();

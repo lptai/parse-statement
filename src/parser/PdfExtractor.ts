@@ -1,7 +1,8 @@
 import { PDFDocumentProxy, getDocument } from 'pdfjs-dist';
-import { pdf_table_extractor } from './extractor.js';
+import { extractPdf } from '../../lib/extractor';
+import { PdfExtractorInterface } from '../interface';
 
-export class PdfExtractor {
+export class PdfExtractor implements PdfExtractorInterface {
   async load(source: string | Buffer): Promise<{
     pageTables: {
       page: string;
@@ -11,7 +12,7 @@ export class PdfExtractor {
   }> {
     const pdfdriver: PDFDocumentProxy = await getDocument(source).promise;
     try {
-      const result = await pdf_table_extractor(pdfdriver);
+      const result = await extractPdf(pdfdriver);
 
       console.log(
         `Extracted ${result.pageTables.length} tables from ${result.numPages} pages`,

@@ -1,4 +1,4 @@
-import { parseTransactions } from '../parse-txn';
+import { parseTransactions } from '../parseTransaction';
 
 const test = [
   'Transactions in detail',

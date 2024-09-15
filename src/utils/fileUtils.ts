@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const basePath = path.join(__dirname, `../data`);
+const basePath = path.join(__dirname, `../../data`);
 
 export const getWriteStream = (name: string) => {
   if (!fs.existsSync(basePath)) {
