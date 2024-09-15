@@ -14,6 +14,7 @@ const vietinFilePaths = [
 ];
 const argibankFilePaths = [
   'SoPhuUBMTTQHN-1500201113838 tu 01.09-12.09.2024.pdf',
+  'mttq_agribank_caobang.pdf'
 ];
 
 const isValidArgibank = (row: string[]) =>
