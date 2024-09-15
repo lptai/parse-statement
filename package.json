@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "parse": "npx ts-node src/parser/index.ts",
-    "analyze": "npx ts-node src/analyzer/index.ts",
-    "test": "npx ts-node src/__test__/parse-txn.test.ts"
+    "parse": "npx ts-node src/index.ts",
+    "test-vcb": "npx ts-node src/__test__/parse-txn.test.ts"
   },
   "dependencies": {
     "pdf-parse": "^1.1.1",
-    "typescript": "^5.6.2"
+    "pdfjs-dist": "^3.7.107",
+    "typescript": "^5.6.2",
+    "tslib": "^2.5.2"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
