@@ -65,7 +65,19 @@ const vcb: Issuer = {
   getParser: () => new VcbExtractor(),
 };
 
+const vcb_2: Issuer = {
+  filePaths: [
+  // `--Thong tin ung ho qua STK VCB 0011001932418 ngay 13.09.2024.pdf`,
+    `Thong tin ung ho qua STK VCB 0011001932418 ngay 11.09.2024.pdf`,
+    `Thong tin ung ho qua STK VCB 0011001932418 ngay 12.09.2024.pdf`
+  ],
+  isValidRecord: (row) => true,
+  headers: (rows) => findHeaderRow(rows, 'NGÀY GIAO DỊCH'),
+  getParser: () => new PdfExtractor(),
+};
+
 void (async () => {
-  await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
-  // await Promise.all([vcb].map(parsePDF));
+  // await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
+  await Promise.all([vcb_2].map(parsePDF));
+  // await Promise.all([bidv].map(parsePDF));
 })();

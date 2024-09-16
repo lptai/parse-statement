@@ -28,7 +28,7 @@ export const writeToCsvFile = (
 ) => {
   let content = data.reduce(
     (acc, item) => acc + item.join(separator) + '\n',
-    headers.join(separator) + '\n',
+    (headers || []).join(separator) + '\n',
   );
 
   if (!fs.existsSync(basePath)) {
