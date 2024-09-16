@@ -37,7 +37,7 @@ const bidv: Issuer = {
     row.every(
       (cell) =>
         !cell.includes(
-          '351 Chứng từ này được in/chuyển đổi trực tiếp từ hệ thống In sao kê tài khoản',
+          'Chứng từ này được in/chuyển đổi trực tiếp từ hệ thống In sao kê tài khoản',
         ) && !cell.includes('Ngày giao dịch'),
     ),
   headers: (rows) => findHeaderRow(rows, 'Ngày giao dịch'),
@@ -66,6 +66,6 @@ const vcb: Issuer = {
 };
 
 void (async () => {
-  // await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
-  await Promise.all([vcb].map(parsePDF));
+  await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
+  // await Promise.all([vcb].map(parsePDF));
 })();
