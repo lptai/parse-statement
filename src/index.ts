@@ -2,21 +2,7 @@ import { Issuer } from './interface';
 import { parsePDF } from './parser/parser';
 import { PdfExtractor } from './parser/PdfExtractor';
 import { VcbExtractor } from './parser/vcb/VcbExtractor';
-
-const vcbFilePaths = [
-  'thong_tin_ung_ho_qua_tsk_vcb_0011001932418_tu_01_09_den10_09_2024.pdf',
-];
-
-const bidvFilePaths = [
-  'Thong tin so tien ung ho qua so tai khoan BIDV 1261122666 tu ngay 01.09 den 12.09.2024.pdf',
-];
-const vietinFilePaths = [
-  'Thong tin so tien ung ho qua so tai khoan VietinBank CT1111 - 111602391111 tu ngay 10 den 12.9.2024.pdf',
-];
-const argibankFilePaths = [
-  'SoPhuUBMTTQHN-1500201113838 tu 01.09-12.09.2024.pdf',
-  'mttq_agribank_caobang.pdf',
-];
+import { getAllFileNamesInFolder } from './utils/fileUtils';
 
 const isValidArgibank = (row: string[]) =>
   row.every((cell) => !cell.includes('SỔ PHỤ') && !cell.includes('Ngày  Date'));
@@ -25,14 +11,14 @@ const findHeaderRow = (rows: string[][], str: string) =>
   rows.find((row) => row.some((cell) => cell.includes(str)));
 
 const argibank: Issuer = {
-  filePaths: argibankFilePaths,
   isValidRecord: isValidArgibank,
   headers: (rows) => findHeaderRow(rows, 'Ngày  Date'),
   getParser: () => new PdfExtractor(),
+  fileDetector: (fileName) =>
+    fileName.includes('argibank') || fileName.includes('1500201113838'),
 };
 
 const bidv: Issuer = {
-  filePaths: bidvFilePaths,
   isValidRecord: (row) =>
     row.every(
       (cell) =>
@@ -42,10 +28,10 @@ const bidv: Issuer = {
     ),
   headers: (rows) => findHeaderRow(rows, 'Ngày giao dịch'),
   getParser: () => new PdfExtractor(),
+  fileDetector: (fileName) => fileName.includes('BIDV'),
 };
 
 const vietin: Issuer = {
-  filePaths: vietinFilePaths,
   isValidRecord: (row) =>
     row.every(
       (cell) =>
@@ -56,28 +42,43 @@ const vietin: Issuer = {
     ),
   headers: (rows) => findHeaderRow(rows, 'Ngày GD'),
   getParser: () => new PdfExtractor(),
+  fileDetector: (fileName) => fileName.includes('CT1111'),
 };
 
 const vcb: Issuer = {
-  filePaths: vcbFilePaths,
   isValidRecord: () => true,
   headers: () => ['date', 'amount', 'reference', 'description'],
   getParser: () => new VcbExtractor(),
+  fileDetector: (fileName) =>
+    fileName.includes('vcb_0011001932418') || fileName.includes('cap nhat'),
 };
 
 const vcb_2: Issuer = {
-  filePaths: [
-  // `--Thong tin ung ho qua STK VCB 0011001932418 ngay 13.09.2024.pdf`,
-    `Thong tin ung ho qua STK VCB 0011001932418 ngay 11.09.2024.pdf`,
-    `Thong tin ung ho qua STK VCB 0011001932418 ngay 12.09.2024.pdf`
-  ],
   isValidRecord: (row) => true,
   headers: (rows) => findHeaderRow(rows, 'NGÀY GIAO DỊCH'),
   getParser: () => new PdfExtractor(),
+  fileDetector: (fileName) =>
+    fileName.includes('Thong tin ung ho qua STK VCB 0011001932418') &&
+    !fileName.includes('cap nhat'),
+};
+
+const parse = async (fileName: string): Promise<void> => {
+  const issuer = [vcb, vcb_2, vietin, bidv, argibank].find((issuer) =>
+    issuer.fileDetector(fileName),
+  );
+  await parsePDF(issuer, fileName);
 };
 
 void (async () => {
-  // await Promise.all([vcb, vietin, bidv, argibank].map(parsePDF));
-  await Promise.all([vcb_2].map(parsePDF));
-  // await Promise.all([bidv].map(parsePDF));
+  const pdfFileNames = getAllFileNamesInFolder('./data_pdf');
+  const csvFileNames = getAllFileNamesInFolder('./data');
+
+  const processFileNames = csvFileNames.map((name) =>
+    name.replace('.csv', '.pdf'),
+  );
+  const toProcessFileNames = pdfFileNames.filter(
+    (name) => !processFileNames.includes(name),
+  );
+
+  await Promise.all(toProcessFileNames.map(parse));
 })();

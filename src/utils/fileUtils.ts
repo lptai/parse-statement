@@ -39,3 +39,11 @@ export const writeToCsvFile = (
 
   console.log('Written to CSV file:', name);
 };
+
+export const readFromFile = async (fileName: string): Promise<string> => {
+  return fs.readFileSync(path.join(basePath, `${fileName}.csv`), 'utf-8');
+};
+
+export const getAllFileNamesInFolder = (dirName: string): string[] => {
+  return fs.readdirSync(dirName);
+};

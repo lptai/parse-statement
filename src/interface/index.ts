@@ -1,8 +1,8 @@
 export interface Issuer {
-  filePaths: string[];
   isValidRecord: (row: string[]) => boolean;
   headers: (rows: string[][]) => string[];
   getParser: () => PdfExtractorInterface;
+  fileDetector: (fileName: string) => boolean;
 }
 
 export interface PdfExtractorInterface {
